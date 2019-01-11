@@ -34,7 +34,7 @@ public class ReactWithWebfluxApplication {
 
 	@Bean
 	WebClient client() {
-		return WebClient.create("http://localhost:8080/originalcoffees");
+		return WebClient.create("http://localhost:8080");
 	}
 	public static void main(String[] args) {
 		SpringApplication.run(ReactWithWebfluxApplication.class, args);
@@ -60,6 +60,7 @@ class MongoController {
 	@GetMapping(value = "/originalcoffees", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public Flux<Coffee> getOriginalCoffees() {
 		return client.get()
+				.uri("/coffees")
 				.retrieve()
 				.bodyToFlux(Coffee.class);
 	}
