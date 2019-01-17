@@ -5,6 +5,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 
 import java.net.URI;
 
@@ -38,7 +39,7 @@ public class TransactionController {
 
 
     @GetMapping
-    Publisher<Transaction> getAll() {
+    Flux<Transaction> getAll() {
         return this.transactionRepository.findAll();
 
     }

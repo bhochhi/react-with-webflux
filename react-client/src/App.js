@@ -41,7 +41,7 @@ class App extends Component {
 
         //simulating delay
         setTimeout(() => {
-          this.setState({
+          this.setState({ 
             bankAccounts: bankAccountData
           });
         }, 4000);
@@ -52,7 +52,9 @@ class App extends Component {
           transactions: transactonData
         }), 1000);
 
-      }, e => console.error(e));
+      }, e1 => console.error(e1));
+
+      
 
   }
 
