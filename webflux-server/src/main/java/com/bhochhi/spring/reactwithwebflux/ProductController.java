@@ -39,4 +39,18 @@ public class ProductController {
 
     }
 
+
+    @GetMapping(value = "/banking")
+    Publisher<Product> getAllBanking() {
+        return this.productRepository.findAllByType("bank");
+
+    }
+
+
+    @GetMapping("/insurance")
+    Publisher<Product> getAllInsurance() {
+        return this.productRepository.findAllByType("pnc");
+
+    }
+
 }

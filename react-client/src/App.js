@@ -62,7 +62,10 @@ class App extends Component {
       }
     ]
 
-    fetch("https://httpbin.org/anything/insurance", {
+
+
+    const banking$ = ajax({
+      url: 'http://localhost:8080/banking',
       method: 'POST',
       mode:'cors',
       body: JSON.stringify(insurance), 
