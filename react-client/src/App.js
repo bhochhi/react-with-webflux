@@ -5,13 +5,8 @@ import logo from './logo.svg';
 import './App.css';
 import AccountSection from './components/account-section.component';
 import ActivitySection from './components/activity-section.component';
-import {
-  range,
-  Observable,
-  combineLatest
-} from 'rxjs';
 
-import {Observable as Obs} from 'rxjs/Observable'
+import { Observable, Subject, asapScheduler, pipe, of, from, interval, merge, fromEvent, SubscriptionLike, PartialObserver, combineLatest, range } from 'rxjs';
 import {
   map,
   filter
