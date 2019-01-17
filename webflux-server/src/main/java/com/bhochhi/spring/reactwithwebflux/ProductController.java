@@ -10,6 +10,7 @@ import java.net.URI;
 
 @RestController
 @RequestMapping(value = "/products", produces = MediaType.APPLICATION_JSON_VALUE)
+@CrossOrigin(origins = "*")
 public class ProductController {
 
 

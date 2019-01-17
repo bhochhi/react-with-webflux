@@ -10,6 +10,7 @@ import java.net.URI;
 
 @RestController
 @RequestMapping(value = "/transactions", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@CrossOrigin(origins = "*")
 public class TransactionController {
 
 
