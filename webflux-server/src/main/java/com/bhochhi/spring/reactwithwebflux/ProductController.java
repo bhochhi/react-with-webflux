@@ -10,6 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 
 import java.net.URI;
+import java.time.Duration;
 
 @Slf4j
 @RestController
@@ -20,7 +21,7 @@ public class ProductController {
 
     private ProductRepository productRepository;
     private ApplicationEventPublisher publisher;
-    private WebClient   webClient;
+    private WebClient webClient;
 
     ProductController(ProductRepository productRepository, ApplicationEventPublisher publisher, WebClient webClient) {
         this.productRepository = productRepository;
@@ -50,9 +51,20 @@ public class ProductController {
     Publisher<Product> getAllStream() {
 
         //make webclient call to three services...
+        Flux<Product> banks  = webClient.get().uri("/products/banking")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .retrieve()
+                .bodyToFlux(Product.class).delayElements(Duration.ofMillis(100L));
+
+        Flux<Product> insurance  = webClient.get().uri("/products/insurance")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .retrieve()
+                .bodyToFlux(Product.class).delayElements(Duration.ofMillis(50L));
 
 
-        return this.productRepository.findAll();
+        return Flux.merge(banks,insurance);
+
+
     }
 
 
@@ -60,6 +72,8 @@ public class ProductController {
     Publisher<Product> getAllBanking() {
         return this.productRepository.findAllByType("bank");
     }
+
+
     @GetMapping(value = "/banking/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     Flux<Product> getAllBankingStream() {
         log.info("publishing stream");
