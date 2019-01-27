@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
+import reactor.util.function.Tuple2;
 
 import java.net.URI;
 import java.time.Duration;
@@ -54,15 +55,15 @@ public class ProductController {
         Flux<Product> banks  = webClient.get().uri("/products/banking")
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
-                .bodyToFlux(Product.class).delayElements(Duration.ofMillis(100L));
+                .bodyToFlux(Product.class);
 
         Flux<Product> insurance  = webClient.get().uri("/products/insurance")
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(Product.class).delayElements(Duration.ofMillis(50L));
 
-
         return Flux.merge(banks,insurance);
+
 
 
     }
@@ -87,5 +88,14 @@ public class ProductController {
         return this.productRepository.findAllByType("pnc");
 
     }
+
+
+    @GetMapping(value = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<Product> sseProducts() {
+        return Flux
+                .zip(Flux.interval(Duration.ofSeconds(1)), this.productRepository.findAll())
+                .map(Tuple2::getT2);
+    }
+
 
 }

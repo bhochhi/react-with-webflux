@@ -29,30 +29,39 @@ class App extends Component {
 
   componentDidMount() {
 
-    const banking$ = ajax('http://localhost:8080/products/banking');
-    const insurance$ = ajax('http://localhost:8080/products/insurance');
-    const transactions$ = ajax('http://localhost:8080/transactions');
+    // const socker$ = ajax('ws://localhost:8080/ws');
+    // const insurance$ = ajax('http://localhost:8080/products/insurance');
+    // const transactions$ = ajax('http://localhost:8080/transactions');
 
-    const subscription = combineLatest(banking$, insurance$, transactions$)
-      .subscribe(([bankRes, insuranceRes,transRes]) => {
-        let bankAccountData = bankRes.response.map(e => e.name);
-        let insuranceAccountData = insuranceRes.response.map(e => e.name);
-        let transactonData = transRes.response.map(e => e.title);
+    const socket = new WebSocket('ws://localhost:8080/ws/allinone');
 
-        //simulating delay
-        setTimeout(() => {
-          this.setState({ 
-            bankAccounts: bankAccountData
-          });
-        }, 4000);
-        setTimeout(() => this.setState({
-          insuranceAccounts: insuranceAccountData
-        }), 3000);
-        setTimeout(() => this.setState({
-          transactions: transactonData
-        }), 1000);
+    socket.addEventListener('message', event => { 
+      console.log(event);
+      const bankData = JSON.parse(event.data);
+      console.log(bankData);
+      this.setState({ bankAccounts: bankData });
+    });
 
-      }, e1 => console.error(e1));
+    // const subscription = combineLatest(banking$, insurance$, transactions$)
+    //   .subscribe(([bankRes, insuranceRes,transRes]) => {
+    //     let bankAccountData = bankRes.response.map(e => e.name);
+    //     let insuranceAccountData = insuranceRes.response.map(e => e.name);
+    //     let transactonData = transRes.response.map(e => e.title);
+
+    //     //simulating delay
+    //     setTimeout(() => {
+    //       this.setState({ 
+    //         bankAccounts: bankAccountData
+    //       });
+    //     }, 4000);
+    //     setTimeout(() => this.setState({
+    //       insuranceAccounts: insuranceAccountData
+    //     }), 3000);
+    //     setTimeout(() => this.setState({
+    //       transactions: transactonData
+    //     }), 1000);
+
+    //   }, e1 => console.error(e1));
       
       
 

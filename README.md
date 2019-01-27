@@ -10,3 +10,6 @@ Resources:
 - https://dev.to/sagar/reactive-programming-in-javascript-with-rxjs-4jom
 - https://spring.io/guides/gs/messaging-stomp-websocket/ 
 - https://github.com/btroncone/learn-rxjs
+- https://developer.okta.com/blog/2018/09/25/spring-webflux-websockets-react 
+- https://blog.monkey.codes/how-to-build-a-chat-app-using-webflux-websockets-react/ 
+
