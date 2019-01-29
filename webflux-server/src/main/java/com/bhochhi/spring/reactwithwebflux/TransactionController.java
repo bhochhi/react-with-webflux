@@ -28,10 +28,6 @@ public class TransactionController {
     Publisher<ResponseEntity<Transaction>> create(@RequestBody Transaction transaction) {
         return this.transactionRepository
                 .save(transaction)
-                .doOnSuccess(trans -> {
-                    System.out.println(trans);
-                    this.publisher.publishEvent(trans);
-                })
                 .map(t -> ResponseEntity.created(URI.create("/transactions/" + t.getId()))
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .build());

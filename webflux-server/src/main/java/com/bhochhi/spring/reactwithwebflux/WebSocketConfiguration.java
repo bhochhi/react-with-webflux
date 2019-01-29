@@ -23,8 +23,6 @@ class WebSocketConfiguration {
     @Autowired
     private ProductRepository productRepository;
 
-    @Autowired
-    ProductCreatedEventPublisher productCreatedEventPublisher;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -39,7 +37,7 @@ class WebSocketConfiguration {
     HandlerMapping handlerMapping() {
 
         Map<String, WebSocketHandler> map = new HashMap<>();
-        map.put("/ws/allinone", new MainWebSocketHandler(objectMapper,productCreatedEventPublisher,productRepository));
+        map.put("/ws/allinone", new MainWebSocketHandler(objectMapper,productRepository));
         SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
         handlerMapping.setOrder(1);
         handlerMapping.setUrlMap(map);

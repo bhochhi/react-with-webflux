@@ -35,7 +35,6 @@ public class ProductController {
     Publisher<ResponseEntity<Product>> create(@RequestBody Product product) {
         return this.productRepository
                 .save(product)
-                .doOnSuccess(prod -> this.publisher.publishEvent(prod))
                 .map(p -> ResponseEntity.created(URI.create("/products/" + p.getId()))
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .build());
