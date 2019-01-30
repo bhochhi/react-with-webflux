@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter;
@@ -27,6 +28,15 @@ class WebSocketConfiguration {
     @Autowired
     ObjectMapper objectMapper;
 
+    @Autowired
+    WebClient webClient;
+
+
+    @Bean
+    WebClient webClient() {
+        return WebClient.create("http://localhost:8080");
+    }
+
     @Bean
     Executor executor() {
         return Executors.newSingleThreadExecutor();
@@ -37,7 +47,7 @@ class WebSocketConfiguration {
     HandlerMapping handlerMapping() {
 
         Map<String, WebSocketHandler> map = new HashMap<>();
-        map.put("/ws/allinone", new MainWebSocketHandler(objectMapper,productRepository));
+        map.put("/ws/allinone", new MainWebSocketHandler(objectMapper,productRepository,webClient));
         SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
         handlerMapping.setOrder(1);
         handlerMapping.setUrlMap(map);
@@ -45,43 +55,11 @@ class WebSocketConfiguration {
     }
 
 
+
+
     @Bean
     WebSocketHandlerAdapter webSocketHandlerAdapter() {
         return new WebSocketHandlerAdapter();
     }
-
-//    @Bean
-//    WebSocketHandler webSocketHandler(
-//            ObjectMapper objectMapper,
-//            ProductCreatedEventPublisher eventPublisher
-//
-//    ) {
-//
-//        Flux<ProductCreatedEvent> publish = Flux
-//                .create(eventPublisher)
-//                .share();
-//
-////        this.productRepository.findAll().doOnSubscribe(product -> eventPublisher.publishEvent(new ProductCreatedEvent(product)));
-//
-//        return session -> {
-//
-//            Flux<WebSocketMessage> messageFlux = publish
-//                    .map(evt -> {
-//                        try {
-//
-//                            return objectMapper.writeValueAsString(evt.getSource());
-//                        }
-//                        catch (JsonProcessingException e) {
-//                            throw new RuntimeException(e);
-//                        }
-//                    })
-//                    .map(str -> {
-//                        log.info("sending " + str);
-//                        return session.textMessage(str);
-//                    });
-//
-//            return session.send(messageFlux);
-//        };
-//    }
 
 }

@@ -34,13 +34,30 @@ class App extends Component {
     // const transactions$ = ajax('http://localhost:8080/transactions');
 
     const socket = new WebSocket('ws://localhost:8080/ws/allinone');
+    // const socket = new WebSocket('ws://localhost:8080/ws/profiles');
 
-    socket.addEventListener('message', event => { 
-      console.log(event);
-      const bankData = JSON.parse(event.data);
-      console.log(bankData);
-      this.setState({ bankAccounts: bankData });
-    });
+    // socket.addEventListener('message', event => { 
+    //   console.log(event);
+    //   // const bankData = JSON.parse(event.data);
+    //   // console.log(bankData);
+    //   // this.setState({ bankAccounts: bankData });
+    // });
+
+    socket.addEventListener('message', function (event) {
+      console.log('message: ',event);
+      socket.send('Thank you for message: '+event.data);
+    // window.alert('message from server: ' + event.data);
+  });
+
+  socket.addEventListener('open', function (m) { console.log("websocket connection open"); 
+      
+      var ss = socket.send("GET_PRODUCTS")
+      console.log('after send',ss);
+      socket.close();
+      // socket.send("GET_TRANSACTIONS")
+
+});
+
 
     // const subscription = combineLatest(banking$, insurance$, transactions$)
     //   .subscribe(([bankRes, insuranceRes,transRes]) => {
