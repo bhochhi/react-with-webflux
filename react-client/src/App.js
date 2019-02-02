@@ -45,15 +45,13 @@ class App extends Component {
 
     socket.addEventListener('message', function (event) {
       console.log('message: ',event);
-      socket.send('Thank you for message: '+event.data);
+      // socket.send('Thank you for message: '+event.data);
     // window.alert('message from server: ' + event.data);
   });
 
   socket.addEventListener('open', function (m) { console.log("websocket connection open"); 
       
-      var ss = socket.send("GET_PRODUCTS")
-      console.log('after send',ss);
-      socket.close();
+      socket.send("GET_PRODUCTS")
       // socket.send("GET_TRANSACTIONS")
 
 });

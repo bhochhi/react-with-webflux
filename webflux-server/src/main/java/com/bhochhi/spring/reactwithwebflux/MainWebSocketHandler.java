@@ -1,15 +1,15 @@
 package com.bhochhi.spring.reactwithwebflux;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.time.Duration;
 
 @Slf4j
 public class MainWebSocketHandler implements WebSocketHandler {
@@ -30,26 +30,68 @@ public class MainWebSocketHandler implements WebSocketHandler {
     @Override
     public Mono<Void> handle(WebSocketSession session) {
 
-        return session.send(Flux.just(session.textMessage("Server is ready"))
-//                        Flux.interval(Duration.ofSeconds(1))
-//                        .map(n -> n.toString())
-//                        .map(session::textMessage)
-        ).and(session.receive()
-                .map(WebSocketMessage::getPayloadAsText)
-                .doOnNext(msg -> log.info("Client request: " + msg))
-                .doOnSubscribe(sub -> log.info("Session Started." + session.getId()))
-                .doOnTerminate(()->log.info("connection terminated"))
-                .doFinally(sig -> log.info("Session Complete." + session.getId()))
+        //This implement combines the inbound and outbound streams:
 
-        ).and(session.send(Flux.just(session.textMessage("Here I am again for you!!! Send your request...")))).doOnSuccessOrError((s, e) -> {
-            if (s != null) {
-                log.info("Successfully completed " + s.toString());
-            }
-            if (e != null) {
-                log.info("Error out " + e.toString());
+        Flux<WebSocketMessage> output = session.receive()
+//                .doOnNext(message -> {
+//                    log.info("From Client: {}",message.getPayloadAsText());
+//
+//                })
+                .concatMap(message -> {
+                    String requestType = message.getPayloadAsText();
+                    if(requestType.equalsIgnoreCase("GET_PRODUCTS")){
+                        Flux<Product>  productFlux = webClient.get().uri("/products")
+                                .accept(MediaType.APPLICATION_JSON_UTF8)
+                                .retrieve()
 
-            }
-        });
+                                .bodyToFlux(Product.class);
+                        return productFlux.map(product -> {
+                            try {
+                                return session.textMessage(objectMapper.writeValueAsString(product));
+                            } catch (JsonProcessingException e) {
+                                e.printStackTrace();
+                            }
+                            return session.textMessage("Unable to send product :" +product.getName() );
+                        });
+                    }
+
+                    return Mono.just(session.textMessage("Unable process your request for "+requestType));
+                });
+//                .map(value -> {
+//                    log.info("value under map==>{}",value.getPayloadAsText());
+//
+//
+//
+//                    return session.textMessage("rupee " + value.getPayloadAsText());
+//                });
+
+//        log.info("Client request is==>{}",output.);
+
+
+
+
+
+//        return session.send(Flux.just(session.textMessage("Server is ready"))
+////                        Flux.interval(Duration.ofSeconds(1))
+////                        .map(n -> n.toString())
+////                        .map(session::textMessage)
+//        ).and(session.receive()
+//                .map(WebSocketMessage::getPayloadAsText)
+//                .doOnNext(msg -> {
+//                    //TODO: make service calls.
+//                    log.info("Client request: " + msg);
+//                })
+//                .doOnSubscribe(sub -> {
+//                    log.info("Session Started." + session.getId());
+//                    sub.cancel();
+//                })
+//                .doOnTerminate(() -> log.info("connection terminated"))
+//                .doFinally(sig -> log.info("Session Complete." + session.getId()))
+//
+//        ).and(session.send(Flux.just(session.textMessage("Here I am again for you!!! Send your request..."))));
+
+
+        return session.send(output);
 
     }
 
