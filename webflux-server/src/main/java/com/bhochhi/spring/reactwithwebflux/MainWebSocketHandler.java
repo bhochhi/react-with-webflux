@@ -39,7 +39,14 @@ public class MainWebSocketHandler implements WebSocketHandler {
                 .accept(MediaType.APPLICATION_JSON_UTF8)
                 .retrieve()
                 .bodyToFlux(Product.class)
-                .map(product -> session.textMessage(product.getName()));
+                .map(product -> {
+                    try {
+                        return session.textMessage(objectMapper.writeValueAsString(product));
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                        return session.textMessage("ERROR");
+                    }
+                });
 
         return session.send(response);
 
