@@ -35,7 +35,7 @@ public class MainWebSocketHandler implements WebSocketHandler {
         //3. send
 
 
-        Flux<WebSocketMessage> response = webClient.get().uri("/products")
+        Flux<WebSocketMessage> productResponse = webClient.get().uri("/products")
                 .accept(MediaType.APPLICATION_JSON_UTF8)
                 .retrieve()
                 .bodyToFlux(Product.class)
@@ -44,11 +44,26 @@ public class MainWebSocketHandler implements WebSocketHandler {
                         return session.textMessage(objectMapper.writeValueAsString(product));
                     } catch (JsonProcessingException e) {
                         e.printStackTrace();
-                        return session.textMessage("ERROR");
+                        return session.textMessage("PROD-ERROR");
+                    }
+                });
+        Flux<WebSocketMessage> transResponse = webClient.get().uri("/transactions")
+                .accept(MediaType.APPLICATION_JSON_UTF8)
+                .retrieve()
+                .bodyToFlux(Transaction.class)
+                .map(transaction -> {
+                    try {
+                        session.getAttributes().put("MessageType","SERVER_DATA");
+                        return session.textMessage(objectMapper.writeValueAsString(transaction));
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                        session.getAttributes().put("MessageType","ERROR");
+                        return session.textMessage("TRANS-ERROR");
                     }
                 });
 
-        return session.send(response);
+
+        return session.send(Flux.merge(productResponse,transResponse));
 
         //2. receive==>send
 

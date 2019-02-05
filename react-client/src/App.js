@@ -24,6 +24,7 @@ class App extends Component {
       insuranceAccounts: ["insuranceAccounts1", "insuranceAccounts2"],
       transactions: ["transaction1", "transaction2"]
     };
+
   }
 
 
@@ -42,13 +43,27 @@ class App extends Component {
     //   // console.log(bankData);
     //   // this.setState({ bankAccounts: bankData });
     // });
-
+    let that = this;
     socket.addEventListener('message', function (event) {
       console.log('message: ',event);
+      if(event.data === 'PROD-ERROR' || event.data === 'TRANS-ERROR'){
+        console.log("Error message: ",event.data);
+      }else{
+        var jsonData = JSON.parse(event.data);
+        console.log("server message: ",jsonData);
+        if(jsonData.type ==='bank'){
+          that.setState({bankAccounts: [jsonData.name]});
+        }else if(jsonData.type ==='pnc'){
+          that.setState({insuranceAccounts: [jsonData.name]});          
+        }else{
+          that.setState({transactions: [jsonData.title]});                    
+        }
+      }
       // socket.send('Thank you for message: '+event.data);
     // window.alert('message from server: ' + event.data);
   });
 
+ 
   socket.addEventListener('open', function (m) { console.log("websocket connection open"); 
       
       socket.send("GET_PRODUCTS")
