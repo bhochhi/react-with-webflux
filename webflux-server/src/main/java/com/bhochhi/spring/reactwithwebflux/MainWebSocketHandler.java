@@ -32,31 +32,45 @@ public class MainWebSocketHandler implements WebSocketHandler {
 
         //This implement combines the inbound and outbound streams:
 
-        Flux<WebSocketMessage> output = session.receive()
-//                .doOnNext(message -> {
-//                    log.info("From Client: {}",message.getPayloadAsText());
+        //3. send
+
+
+        Flux<WebSocketMessage> response = webClient.get().uri("/products")
+                .accept(MediaType.APPLICATION_JSON_UTF8)
+                .retrieve()
+                .bodyToFlux(Product.class)
+                .map(product -> session.textMessage(product.getName()));
+
+        return session.send(response);
+
+        //2. receive==>send
+
+//        Flux<WebSocketMessage> output = session.receive()
+////                .doOnNext(message -> {
+////                    log.info("From Client: {}",message.getPayloadAsText());
+////
+////                })
+//                .concatMap(message -> {
+//                    String requestType = message.getPayloadAsText();
+//                    if(requestType.equalsIgnoreCase("GET_PRODUCTS")){
+//                        Flux<Product>  productFlux = webClient.get().uri("/products")
+//                                .accept(MediaType.APPLICATION_JSON_UTF8)
+//                                .retrieve()
 //
-//                })
-                .concatMap(message -> {
-                    String requestType = message.getPayloadAsText();
-                    if(requestType.equalsIgnoreCase("GET_PRODUCTS")){
-                        Flux<Product>  productFlux = webClient.get().uri("/products")
-                                .accept(MediaType.APPLICATION_JSON_UTF8)
-                                .retrieve()
+//                                .bodyToFlux(Product.class);
+//                        return productFlux.map(product -> {
+//                            try {
+//                                return session.textMessage(objectMapper.writeValueAsString(product));
+//                            } catch (JsonProcessingException e) {
+//                                e.printStackTrace();
+//                            }
+//                            return session.textMessage("Unable to send product :" +product.getName() );
+//                        });
+//                    }
+//
+//                    return Mono.just(session.textMessage("Unable process your request for "+requestType));
+//                });
 
-                                .bodyToFlux(Product.class);
-                        return productFlux.map(product -> {
-                            try {
-                                return session.textMessage(objectMapper.writeValueAsString(product));
-                            } catch (JsonProcessingException e) {
-                                e.printStackTrace();
-                            }
-                            return session.textMessage("Unable to send product :" +product.getName() );
-                        });
-                    }
-
-                    return Mono.just(session.textMessage("Unable process your request for "+requestType));
-                });
 //                .map(value -> {
 //                    log.info("value under map==>{}",value.getPayloadAsText());
 //
@@ -70,6 +84,7 @@ public class MainWebSocketHandler implements WebSocketHandler {
 
 
 
+        //1. ==> send ==> receive==> send
 
 //        return session.send(Flux.just(session.textMessage("Server is ready"))
 ////                        Flux.interval(Duration.ofSeconds(1))
@@ -91,7 +106,7 @@ public class MainWebSocketHandler implements WebSocketHandler {
 //        ).and(session.send(Flux.just(session.textMessage("Here I am again for you!!! Send your request..."))));
 
 
-        return session.send(output);
+//        return session.send(output);
 
     }
 
