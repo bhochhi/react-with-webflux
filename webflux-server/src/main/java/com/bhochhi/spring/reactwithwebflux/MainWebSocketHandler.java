@@ -35,8 +35,8 @@ public class MainWebSocketHandler implements WebSocketHandler {
         //3. send
 
 
-        Flux<WebSocketMessage> productResponse = webClient.get().uri("/products")
-                .accept(MediaType.APPLICATION_JSON_UTF8)
+        Flux<WebSocketMessage> productResponse = webClient.get().uri("/products/stream")
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(Product.class)
                 .map(product -> {

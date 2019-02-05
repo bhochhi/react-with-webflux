@@ -54,7 +54,7 @@ public class ProductController {
         Flux<Product> banks  = webClient.get().uri("/products/banking")
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
-                .bodyToFlux(Product.class);
+                .bodyToFlux(Product.class).delayElements(Duration.ofSeconds(2));
 
         Flux<Product> insurance  = webClient.get().uri("/products/insurance")
                 .accept(MediaType.TEXT_EVENT_STREAM)

@@ -18,10 +18,10 @@ class AccountSection extends Component {
 
     render() {
         var bankAccounts = this.state.bankAccounts.map(ac => {
-            return (<li key={ac} >{ac}</li>)
+            return (<li key={ac.id} >{ac.name}</li>)
         });
         var investAccounts = this.state.insuranceAccounts.map(ac => {
-            return (<li key={ac} >{ac}</li>)
+            return (<li key={ac.id} >{ac.name}</li>)
         });
 
         return (

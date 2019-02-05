@@ -20,8 +20,8 @@ class App extends Component {
     super(props, context);
 
     this.state = {
-      bankAccounts: ["bankAccounts1", "bankAccounts2"],
-      insuranceAccounts: ["insuranceAccounts1", "insuranceAccounts2"],
+      bankAccounts: [{id:'uuid',"name":"dummy name"}],
+      insuranceAccounts: [],
       transactions: ["transaction1", "transaction2"]
     };
 
@@ -35,14 +35,7 @@ class App extends Component {
     // const transactions$ = ajax('http://localhost:8080/transactions');
 
     const socket = new WebSocket('ws://localhost:8080/ws/allinone');
-    // const socket = new WebSocket('ws://localhost:8080/ws/profiles');
 
-    // socket.addEventListener('message', event => { 
-    //   console.log(event);
-    //   // const bankData = JSON.parse(event.data);
-    //   // console.log(bankData);
-    //   // this.setState({ bankAccounts: bankData });
-    // });
     let that = this;
     socket.addEventListener('message', function (event) {
       console.log('message: ',event);
@@ -51,10 +44,32 @@ class App extends Component {
       }else{
         var jsonData = JSON.parse(event.data);
         console.log("server message: ",jsonData);
-        if(jsonData.type ==='bank'){
-          that.setState({bankAccounts: [jsonData.name]});
+        if(jsonData.type ==='bank'){  
+          let bankAccounts = that.state.bankAccounts.map(a => ({...a}));
+          let account = bankAccounts.find(ac=>ac.id===jsonData.id);
+          if(!!account){
+              bankAccounts.forEach(ac=>{
+              if(ac.id === jsonData.id){
+                ac.name = jsonData.name
+              }
+            })
+          }else{
+            bankAccounts.push({id:jsonData.id,name:jsonData.name})
+          }
+          that.setState({bankAccounts: bankAccounts});
         }else if(jsonData.type ==='pnc'){
-          that.setState({insuranceAccounts: [jsonData.name]});          
+          let insuranceAccounts = that.state.insuranceAccounts.map(a => ({...a}));
+          let account = insuranceAccounts.find(ac=>ac.id===jsonData.id);
+          if(!!account){
+            insuranceAccounts.forEach(ac=>{
+              if(ac.id === jsonData.id){
+                ac.name = jsonData.name
+              }
+            })
+          }else{
+            insuranceAccounts.push({id:jsonData.id,name:jsonData.name})
+          }
+          that.setState({insuranceAccounts: insuranceAccounts});         
         }else{
           that.setState({transactions: [jsonData.title]});                    
         }
@@ -66,7 +81,7 @@ class App extends Component {
  
   socket.addEventListener('open', function (m) { console.log("websocket connection open"); 
       
-      socket.send("GET_PRODUCTS")
+      //socket.send("GET_PRODUCTS")
       // socket.send("GET_TRANSACTIONS")
 
 });
