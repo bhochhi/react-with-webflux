@@ -22,7 +22,7 @@ class App extends Component {
     this.state = {
       bankAccounts: [{id:'uuid',"name":"dummy name"}],
       insuranceAccounts: [{id:'uuid1',"name":"insurance 1"},{id:'uuid444',"name":"insuranceddd"}],
-      transactions: ["transaction1", "transaction2"]
+      transactions: [{id:"trans1",title:"transaction1"}]
     };
 
   }
@@ -81,7 +81,7 @@ class App extends Component {
               }
             })
           }else{
-            trans.push({id:trans.id, title:trans.title});
+            copytransactions.push({id:jsonData.id, title:jsonData.title});
           }
           that.setState({transactions: copytransactions});                    
         }
