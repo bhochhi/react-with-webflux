@@ -18,7 +18,7 @@ class ActivitySection extends Component {
 
     render() {
         var transactions = this.state.transactions.map((ac) => {
-            return (<li key={Math.random()} >{ac}</li>)
+            return (<li key={ac.id} >{ac.title}</li>)
         });
 
         return (

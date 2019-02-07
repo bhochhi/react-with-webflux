@@ -38,12 +38,25 @@ public class ProductController {
                 .map(p -> ResponseEntity.created(URI.create("/products/" + p.getId()))
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .build());
+
+        //TODO: add Event Sourcing to publish created product.
     }
 
 
-    @GetMapping
+    //How the media type plays the role...
+    @GetMapping(produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     Publisher<Product> getAll() {
-        return this.productRepository.findAll();
+        Flux<Product> banks  = webClient.get().uri("/products/banking")
+                .accept(MediaType.APPLICATION_JSON_UTF8)
+                .retrieve()
+                .bodyToFlux(Product.class).delayElements(Duration.ofSeconds(2));
+
+        Flux<Product> insurance  = webClient.get().uri("/products/insurance")
+                .accept(MediaType.APPLICATION_JSON_UTF8)
+                .retrieve()
+                .bodyToFlux(Product.class).delaySequence(Duration.ofMillis(500L));
+
+        return Flux.merge(banks,insurance);
 
     }
 
@@ -59,11 +72,9 @@ public class ProductController {
         Flux<Product> insurance  = webClient.get().uri("/products/insurance")
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
-                .bodyToFlux(Product.class).delayElements(Duration.ofMillis(50L));
+                .bodyToFlux(Product.class).delaySequence(Duration.ofMillis(500L));
 
         return Flux.merge(banks,insurance);
-
-
 
     }
 

@@ -21,7 +21,7 @@ class App extends Component {
 
     this.state = {
       bankAccounts: [{id:'uuid',"name":"dummy name"}],
-      insuranceAccounts: [],
+      insuranceAccounts: [{id:'uuid1',"name":"insurance 1"},{id:'uuid444',"name":"insuranceddd"}],
       transactions: ["transaction1", "transaction2"]
     };
 
@@ -45,7 +45,7 @@ class App extends Component {
         var jsonData = JSON.parse(event.data);
         console.log("server message: ",jsonData);
         if(jsonData.type ==='bank'){  
-          let bankAccounts = that.state.bankAccounts.map(a => ({...a}));
+          let bankAccounts = that.state.bankAccounts.map(a => ({...a})); //making a deep copy
           let account = bankAccounts.find(ac=>ac.id===jsonData.id);
           if(!!account){
               bankAccounts.forEach(ac=>{
@@ -71,7 +71,19 @@ class App extends Component {
           }
           that.setState({insuranceAccounts: insuranceAccounts});         
         }else{
-          that.setState({transactions: [jsonData.title]});                    
+
+          let copytransactions = that.state.transactions.map(a => ({...a})); 
+          let trans = copytransactions.find(ac=>ac.id===jsonData.id);
+          if(!!trans){
+            copytransactions.forEach(ac=>{
+              if(ac.id === jsonData.id){
+                ac.title = jsonData.title
+              }
+            })
+          }else{
+            trans.push({id:trans.id, title:trans.title});
+          }
+          that.setState({transactions: copytransactions});                    
         }
       }
       // socket.send('Thank you for message: '+event.data);
