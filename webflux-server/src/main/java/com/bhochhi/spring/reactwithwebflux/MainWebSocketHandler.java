@@ -11,6 +11,8 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+
 @Slf4j
 public class MainWebSocketHandler implements WebSocketHandler {
 
@@ -50,7 +52,7 @@ public class MainWebSocketHandler implements WebSocketHandler {
         Flux<WebSocketMessage> transResponse = webClient.get().uri("/transactions")
                 .accept(MediaType.APPLICATION_JSON_UTF8)
                 .retrieve()
-                .bodyToFlux(Transaction.class)
+                .bodyToFlux(Transaction.class).delaySequence(Duration.ofMillis(1000))
                 .map(transaction -> {
                     try {
                         session.getAttributes().put("MessageType","SERVER_DATA");

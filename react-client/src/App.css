@@ -1,5 +1,7 @@
 .App {
-  text-align: center;
+  /* text-align: center; */
+  /* display: flex; */
+
 }
 
 .App-logo {
@@ -8,19 +10,38 @@
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+  /* background-color: #282c34; */
+  /* min-height: 100vh; */
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  flex-direction: row;
+  /* align-items: center; */
+  /* justify-content: center; */
   font-size: calc(10px + 2vmin);
-  color: white;
+  /* color: white; */
+  padding: 0 40px;
 }
 
 .App-link {
   color: #61dafb;
 }
+
+.account-section, .activity-section{
+  padding: 0 50px;
+}
+.account-section{
+  flex: 2 0 0;
+}
+.activity-section{
+  flex: 1 0 0;
+}
+
+.banking-title,
+.insurance-title,
+.trans-title{
+border-bottom: 2px solid black
+}
+
+
 
 @keyframes App-logo-spin {
   from {

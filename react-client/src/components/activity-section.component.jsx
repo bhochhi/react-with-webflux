@@ -23,7 +23,8 @@ class ActivitySection extends Component {
 
         return (
             <div className="activity-section">
-                <h1>Recent Transactions</h1>
+                <h1 className="trans-title">Recent Transactions</h1>
+                
                 {transactions}
             </div>
         );

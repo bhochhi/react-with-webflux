@@ -27,12 +27,11 @@ class AccountSection extends Component {
         return (
             <div className="account-section">
                 <div className="banking">
-                    <h1>Banking</h1>
+                    <h1 className="banking-title">Banking</h1>
                     {bankAccounts}
                 </div>
-                <hr/>
                 <div className="investment">
-                <h1>Investment</h1>
+                <h1 className="banking-title">Investment</h1>
                     {investAccounts}
                 </div>
             </div>
