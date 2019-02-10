@@ -20,7 +20,7 @@ class App extends Component {
     super(props, context);
 
     this.state = {
-      bankAccounts: [{id:'345e03e3-31e6-46cc-a707-59b5023d3254',"name":"dummy name"},{id:'455223ad-6cf4-4488-bcc0-d72aa23fbf59',name:"my old nick name"}],
+      bankAccounts: [{id:'uuid',"name":"dummy name"},{id:'455223ad-6cf4-4488-bcc0-d72aa23fbf59',name:"my old nickname"}],
       insuranceAccounts: [{id:'uuid1',"name":"insurance 1"},{id:'uuid444',"name":"insuranceddd"}],
       transactions: [{id:"trans1",title:"transaction1"}]
     };

@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
@@ -15,9 +16,13 @@ public class ReactWithWebfluxApplication {
     CommandLineRunner demoData(ProductRepository productRepository, TransactionRepository transactionRepository) {
         return args -> {
             productRepository.deleteAll().thenMany(
-                    Flux.just("bankProduct1,bank", "bankProduct2,bank", "bankProduct3,bank", "insProduct1,pnc", "insProduct2,pnc", "insProduct3,pnc", "insProduct4,pnc")
+
+                    Flux.just("bankProduct1,bank", "bankProduct2,bank", "bankProduct3,bank", "insProduct1,pnc", "insProduct2,pnc", "insProduct3,pnc", "insProduct4,pnc","uuid,new nickName,bank")
                             .map(data -> {
                                 String[] prod = data.split(",");
+                                if(prod.length==3){
+                                    return new Product(prod[0], prod[1], prod[2]);
+                                }
                                 return new Product(UUID.randomUUID().toString(), prod[0], prod[1]);
                             })
                             .flatMap(productRepository::save))
@@ -43,7 +48,6 @@ public class ReactWithWebfluxApplication {
     WebClient client() {
         return WebClient.create("http://localhost:8080");
     }
-
 
 
     public static void main(String[] args) {
