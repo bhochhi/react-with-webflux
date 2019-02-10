@@ -13,5 +13,9 @@ Resources:
 - https://developer.okta.com/blog/2018/09/25/spring-webflux-websockets-react 
 - https://blog.monkey.codes/how-to-build-a-chat-app-using-webflux-websockets-react/ 
 - https://github.com/spring-projects/spring-framework/blob/master/src/docs/asciidoc/web/webflux-websocket.adoc 
+- https://developer.okta.com/blog/2018/09/24/reactive-apis-with-spring-webflux
+- https://developer.okta.com/blog/2018/09/25/spring-webflux-websockets-react 
+- https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format
+
 
     

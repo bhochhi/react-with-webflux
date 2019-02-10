@@ -24,28 +24,20 @@ class App extends Component {
       insuranceAccounts: [{id:'uuid1',"name":"insurance 1"},{id:'uuid444',"name":"insuranceddd"}],
       transactions: [{id:"trans1",title:"transaction1"}]
     };
-
+    this.processMessage = this.processMessage.bind(this);
   }
 
-
-  componentDidMount() {
-
-    // const socker$ = ajax('ws://localhost:8080/ws');
-    // const insurance$ = ajax('http://localhost:8080/products/insurance');
-    // const transactions$ = ajax('http://localhost:8080/transactions');
-
-    const socket = new WebSocket('ws://localhost:8080/ws/allinone');
-
-    let that = this;
-    socket.addEventListener('message', function (event) {
-      console.log('message: ',event);
+  processMessage(event){
+      console.log('message: ',event,event.id);
+      // if (event.id == "CLOSE") {
+      //    source.close(); 
+      // }
       if(event.data === 'PROD-ERROR' || event.data === 'TRANS-ERROR'){
         console.log("Error message: ",event.data);
       }else{
         var jsonData = JSON.parse(event.data);
-        console.log("server message: ",jsonData);
         if(jsonData.type ==='bank'){  
-          let bankAccounts = that.state.bankAccounts.map(a => ({...a})); //making a deep copy
+          let bankAccounts = this.state.bankAccounts.map(a => ({...a})); //making a deep copy
           let account = bankAccounts.find(ac=>ac.id===jsonData.id);
           if(!!account){
               bankAccounts.forEach(ac=>{
@@ -56,9 +48,9 @@ class App extends Component {
           }else{
             bankAccounts.push({id:jsonData.id,name:jsonData.name})
           }
-          that.setState({bankAccounts: bankAccounts});
+          this.setState({bankAccounts: bankAccounts});
         }else if(jsonData.type ==='pnc'){
-          let insuranceAccounts = that.state.insuranceAccounts.map(a => ({...a}));
+          let insuranceAccounts = this.state.insuranceAccounts.map(a => ({...a}));
           let account = insuranceAccounts.find(ac=>ac.id===jsonData.id);
           if(!!account){
             insuranceAccounts.forEach(ac=>{
@@ -69,10 +61,10 @@ class App extends Component {
           }else{
             insuranceAccounts.push({id:jsonData.id,name:jsonData.name})
           }
-          that.setState({insuranceAccounts: insuranceAccounts});         
+          this.setState({insuranceAccounts: insuranceAccounts});         
         }else{
 
-          let copytransactions = that.state.transactions.map(a => ({...a})); 
+          let copytransactions = this.state.transactions.map(a => ({...a})); 
           let trans = copytransactions.find(ac=>ac.id===jsonData.id);
           if(!!trans){
             copytransactions.forEach(ac=>{
@@ -83,44 +75,37 @@ class App extends Component {
           }else{
             copytransactions.push({id:jsonData.id, title:jsonData.title});
           }
-          that.setState({transactions: copytransactions});                    
+          this.setState({transactions: copytransactions});                    
         }
-      }
-      // socket.send('Thank you for message: '+event.data);
-    // window.alert('message from server: ' + event.data);
-  });
+      } 
+  }
 
- 
-  socket.addEventListener('open', function (m) { console.log("websocket connection open"); 
-      
-      //socket.send("GET_PRODUCTS")
-      // socket.send("GET_TRANSACTIONS")
+  componentDidMount() {
 
-});
+//REST
+    // const insurance$ = ajax('http://localhost:8080/products/insurance');
+    // const transactions$ = ajax('http://localhost:8080/transactions');
 
 
-    // const subscription = combineLatest(banking$, insurance$, transactions$)
-    //   .subscribe(([bankRes, insuranceRes,transRes]) => {
-    //     let bankAccountData = bankRes.response.map(e => e.name);
-    //     let insuranceAccountData = insuranceRes.response.map(e => e.name);
-    //     let transactonData = transRes.response.map(e => e.title);
+//WebSocket
+    // const socket = new WebSocket('ws://localhost:8080/ws/allinone'); 
+    // socket.addEventListener('message', this.processMessage);
 
-    //     //simulating delay
-    //     setTimeout(() => {
-    //       this.setState({ 
-    //         bankAccounts: bankAccountData
-    //       });
-    //     }, 4000);
-    //     setTimeout(() => this.setState({
-    //       insuranceAccounts: insuranceAccountData
-    //     }), 3000);
-    //     setTimeout(() => this.setState({
-    //       transactions: transactonData
-    //     }), 1000);
 
-    //   }, e1 => console.error(e1));
-      
-      
+//SSE
+      const eventSource = new EventSource('http://localhost:8080/products/sse'); 
+      console.log(eventSource);
+      eventSource.onopen = event => console.log('sse open', event); 
+      eventSource.onmessage =  this.processMessage
+
+      eventSource.onerror = event => {
+        console.log('sse error', event, event);
+        eventSource.close(); //I don't agree
+        if(event.readyState === EventSource.CLOSED){
+            console.log('see connection closed',eventSource);
+            eventSource.close();
+        }
+    };
 
   }
 

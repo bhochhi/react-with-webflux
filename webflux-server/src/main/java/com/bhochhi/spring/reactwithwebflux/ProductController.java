@@ -38,8 +38,6 @@ public class ProductController {
                 .map(p -> ResponseEntity.created(URI.create("/products/" + p.getId()))
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .build());
-
-        //TODO: add Event Sourcing to publish created product.
     }
 
 
@@ -63,7 +61,7 @@ public class ProductController {
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     Publisher<Product> getAllStream() {
 
-        //make webclient call to three services...
+        //make webclient call to services...
         Flux<Product> banks  = webClient.get().uri("/products/banking")
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
@@ -78,18 +76,27 @@ public class ProductController {
 
     }
 
+    @GetMapping(value = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    Publisher<Product> getAllStreamForSSE() {
+
+        Flux<Product> banks  = webClient.get().uri("/products/banking")
+//                .accept(MediaType.TEXT_EVENT_STREAM)
+                .retrieve()
+                .bodyToFlux(Product.class).delayElements(Duration.ofSeconds(2));
+
+        Flux<Product> insurance  = webClient.get().uri("/products/insurance")
+//                .accept(MediaType.TEXT_EVENT_STREAM)
+                .retrieve()
+                .bodyToFlux(Product.class).delaySequence(Duration.ofMillis(500L));
+
+        return Flux.merge(banks,insurance);
+
+    }
+
 
     @GetMapping(value = "/banking")
     Publisher<Product> getAllBanking() {
         return this.productRepository.findAllByType("bank");
-    }
-
-
-    @GetMapping(value = "/banking/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    Flux<Product> getAllBankingStream() {
-        log.info("publishing stream");
-        return this.productRepository.findAllByType("bank");
-
     }
 
 
@@ -98,14 +105,5 @@ public class ProductController {
         return this.productRepository.findAllByType("pnc");
 
     }
-
-
-    @GetMapping(value = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<Product> sseProducts() {
-        return Flux
-                .zip(Flux.interval(Duration.ofSeconds(1)), this.productRepository.findAll())
-                .map(Tuple2::getT2);
-    }
-
 
 }
