@@ -5,13 +5,16 @@ import org.reactivestreams.Publisher;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
 import java.net.URI;
 import java.time.Duration;
+import java.time.LocalTime;
 
 @Slf4j
 @RestController
@@ -44,17 +47,17 @@ public class ProductController {
     //How the media type plays the role...
     @GetMapping(produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     Publisher<Product> getAll() {
-        Flux<Product> banks  = webClient.get().uri("/products/banking")
+        Flux<Product> banks = webClient.get().uri("/products/banking")
                 .accept(MediaType.APPLICATION_JSON_UTF8)
                 .retrieve()
                 .bodyToFlux(Product.class).delayElements(Duration.ofSeconds(2));
 
-        Flux<Product> insurance  = webClient.get().uri("/products/insurance")
+        Flux<Product> insurance = webClient.get().uri("/products/insurance")
                 .accept(MediaType.APPLICATION_JSON_UTF8)
                 .retrieve()
                 .bodyToFlux(Product.class).delaySequence(Duration.ofMillis(500L));
 
-        return Flux.merge(banks,insurance);
+        return Flux.merge(banks, insurance);
 
     }
 
@@ -62,34 +65,46 @@ public class ProductController {
     Publisher<Product> getAllStream() {
 
         //make webclient call to services...
-        Flux<Product> banks  = webClient.get().uri("/products/banking")
+        Flux<Product> banks = webClient.get().uri("/products/banking")
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(Product.class).delayElements(Duration.ofSeconds(2));
 
-        Flux<Product> insurance  = webClient.get().uri("/products/insurance")
+        Flux<Product> insurance = webClient.get().uri("/products/insurance")
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(Product.class).delaySequence(Duration.ofMillis(500L));
 
-        return Flux.merge(banks,insurance);
+        return Flux.merge(banks, insurance);
 
     }
 
     @GetMapping(value = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    Publisher<Product> getAllStreamForSSE() {
+    Publisher<ServerSentEvent<Product>> getProductsAsSSE() {
 
-        Flux<Product> banks  = webClient.get().uri("/products/banking")
-//                .accept(MediaType.TEXT_EVENT_STREAM)
+        Flux<ServerSentEvent<Product>> banks = webClient.get().uri("/products/banking")
                 .retrieve()
-                .bodyToFlux(Product.class).delayElements(Duration.ofSeconds(2));
+                .bodyToFlux(Product.class).delayElements(Duration.ofSeconds(2))
+                .map(product -> ServerSentEvent.<Product>builder()
+                        .id(String.valueOf(product.hashCode()))
+                        .event("bankProduct")
+                        .data(product)
+                        .build());
 
-        Flux<Product> insurance  = webClient.get().uri("/products/insurance")
-//                .accept(MediaType.TEXT_EVENT_STREAM)
+
+        Publisher<ServerSentEvent<Product>> insurance = webClient.get().uri("/products/insurance")
                 .retrieve()
-                .bodyToFlux(Product.class).delaySequence(Duration.ofMillis(500L));
+                .bodyToFlux(Product.class).delaySequence(Duration.ofMillis(500L))
+                .map(product -> ServerSentEvent.<Product>builder()
+                        .id(String.valueOf(product.hashCode()))
+                        .event("message")
+                        .data(product)
+                        .build());
 
-        return Flux.merge(banks,insurance);
+        return Flux.concat(Flux.merge(banks, insurance), Mono.just(ServerSentEvent.<Product>builder()
+                .id("disconnected")
+                .event("disconnect") //not working yet!!
+                .build()));
 
     }
 

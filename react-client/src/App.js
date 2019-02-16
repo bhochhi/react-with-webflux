@@ -25,31 +25,13 @@ class App extends Component {
       transactions: [{id:"trans1",title:"transaction1"}]
     };
     this.processMessage = this.processMessage.bind(this);
+    this.processBankProduct = this.processBankProduct.bind(this);
   }
 
   processMessage(event){
-      console.log('message: ',event,event.id);
-      // if (event.id == "CLOSE") {
-      //    source.close(); 
-      // }
-      if(event.data === 'PROD-ERROR' || event.data === 'TRANS-ERROR'){
-        console.log("Error message: ",event.data);
-      }else{
+      console.log('message: ',event);
         var jsonData = JSON.parse(event.data);
-        if(jsonData.type ==='bank'){  
-          let bankAccounts = this.state.bankAccounts.map(a => ({...a})); //making a deep copy
-          let account = bankAccounts.find(ac=>ac.id===jsonData.id);
-          if(!!account){
-              bankAccounts.forEach(ac=>{
-              if(ac.id === jsonData.id){
-                ac.name = jsonData.name
-              }
-            })
-          }else{
-            bankAccounts.push({id:jsonData.id,name:jsonData.name})
-          }
-          this.setState({bankAccounts: bankAccounts});
-        }else if(jsonData.type ==='pnc'){
+       if(jsonData.type ==='pnc'){
           let insuranceAccounts = this.state.insuranceAccounts.map(a => ({...a}));
           let account = insuranceAccounts.find(ac=>ac.id===jsonData.id);
           if(!!account){
@@ -77,9 +59,24 @@ class App extends Component {
           }
           this.setState({transactions: copytransactions});                    
         }
-      } 
   }
 
+  processBankProduct(event){
+    console.log('bankProdect event: ',event);
+      var jsonData = JSON.parse(event.data);
+        let bankAccounts = this.state.bankAccounts.map(a => ({...a})); //making a deep copy
+        let account = bankAccounts.find(ac=>ac.id===jsonData.id);
+        if(!!account){
+            bankAccounts.forEach(ac=>{
+            if(ac.id === jsonData.id){
+              ac.name = jsonData.name
+            }
+          })
+        }else{
+          bankAccounts.push({id:jsonData.id,name:jsonData.name})
+        }
+        this.setState({bankAccounts: bankAccounts});
+}
   componentDidMount() {
 
 //REST
@@ -93,14 +90,25 @@ class App extends Component {
 
 
 //SSE
+
+      if (typeof(EventSource) === undefined) {
+        alert('Error: Server-Sent Events are not supported in your browser');
+        return;
+      }
+
       const eventSource = new EventSource('http://localhost:8080/products/sse'); 
-      console.log(eventSource);
-      eventSource.onopen = event => console.log('sse open', event); 
+
+      eventSource.addEventListener('bankProduct', this.processBankProduct);
+      eventSource.addEventListener('disconnect',  function(event){
+        console.log('disconnect event: all products received',event);
+        eventSource.close();
+      });
       eventSource.onmessage =  this.processMessage
+      eventSource.onopen = event => console.log('sse open', event); 
 
       eventSource.onerror = event => {
-        console.log('sse error', event, event);
-        eventSource.close(); //I don't agree
+        console.log('sse error', event);
+        eventSource.close();
         if(event.readyState === EventSource.CLOSED){
             console.log('see connection closed',eventSource);
             eventSource.close();
