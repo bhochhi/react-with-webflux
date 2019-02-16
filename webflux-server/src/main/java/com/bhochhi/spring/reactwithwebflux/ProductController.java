@@ -101,10 +101,24 @@ public class ProductController {
                         .data(product)
                         .build());
 
-        return Flux.concat(Flux.merge(banks, insurance), Mono.just(ServerSentEvent.<Product>builder()
-                .id("disconnected")
-                .event("disconnect") //not working yet!!
-                .build()));
+        return Flux.concat(
+                Flux.merge(banks, insurance),
+
+                Mono.just(ServerSentEvent.<Product>builder()
+                        .id("project-to-be-removed_id")
+                        .event("removeProduct")
+                        .data(new Product() {{
+                            setId("uuid-need-to-be-removed");
+                        }})
+                        .build()),
+
+                Mono.just(ServerSentEvent.<Product>builder()
+                        .id("disconnected_id")
+                        .event("disconnectEvent") //not working yet!
+                        .data(new Product(){{
+                            setId("uuid-need-tofff-be-removed");
+                        }})
+                        .build()));
 
     }
 
